@@ -15,19 +15,17 @@ class GetLog():
 
     def get_log(self):
         current_time = self.time()
-        try:
-            if os.path.isdir(os.path.split(self.path )[0]):
-                pass
-            else:
-                logfile = os.path.join(self.path)
-                print logfile
-                
-            with threading.RLock():
-                file_handler = logging.handlers.TimedRotatingFileHandler(
-                    self.path, when='MIDNIGHT', backupCount=0)
-                logging.root.addHandler(file_handler)
-        except IOError:
-            print "ok"
+        
+        if os.path.isdir(os.path.split(self.path )[0]):
+            pass
+        else:
+            logfile = os.path.join(self.path)
+            print logfile
+        # to create new file and     
+        with threading.RLock():
+            file_handler = logging.handlers.TimedRotatingFileHandler(
+                self.path, when='MIDNIGHT', backupCount=0)
+            logging.root.addHandler(file_handler)
 
         formatter = logging.Formatter('%(asctime)s %(levelname)s [%(threadName)s]: %(message)s')
         logger = logging.getLogger(self.path)
@@ -41,7 +39,8 @@ class GetLog():
         logger.addHandler(lh)
         logger.addHandler(ch)
         logger.info(self.content)
-
+        
+    # to add the current time and date to log_name
     def time(self):
         current_time = datetime.datetime.now()
         return current_time.strftime('%Y-%m-%d %H:%M')
