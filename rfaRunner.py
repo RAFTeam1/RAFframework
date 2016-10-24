@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 '''
 Created on Oct 19, 2016
-Updated on Oct 22, 2016
+Updated on Oct 23, 2016
 
 @author: sashaalexander
-@coauthor: tacora
+@author: tacora
 '''
-from rfaUtils import getLog,qaprint
+from rfaUtils import getlog, qaprint
 
-log = getLog()
+def run_getlog():
+    """ calls getlog() and qaprint()
+    """
+    log = getlog()
+    message = "It is working, right?\n"
+    qaprint(log, message)
 
-message = "It is working, right?\n"
-qaprint(log, message)
-
-log.close()
+if __name__ == "__main__":
+    run_getlog()
