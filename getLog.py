@@ -11,28 +11,39 @@ class GetLog():
         self.path = path
         self.log_file = log_file
         self.content = content
+    
+    def setup(self):
+        self.rfaRunner()
+        self.rfaUtils()
 
-
-    def get_log(self):
-        current_time = self.time()
+    def rfaRunner(self):
+       
+        try:
+            if os.path.isdir(os.path.split(self.path )[0]):
+                pass
         
-        if os.path.isdir(os.path.split(self.path )[0]):
-            pass
-        else:
-            logfile = os.path.join(self.path)
-            print logfile
-        # to create new file and     
-        with threading.RLock():
-            file_handler = logging.handlers.TimedRotatingFileHandler(
-                self.path, when='MIDNIGHT', backupCount=0)
-            logging.root.addHandler(file_handler)
-
+            #else:
+                #logfile = os.path.join(self.path)
+                #print logfile
+                
+        # to create new file and   
+            #with threading.RLock():
+                #file_handler = logging.handlers.TimedRotatingFileHandler(
+                    #self.path, when='MIDNIGHT', backupCount=0)
+                #logging.root.addHandler(file_handler)
+                
+        except IOError:
+            #print self.path
+            return -1
+        
+    def rfaUtils(self):
+        current_time = self.time()
         formatter = logging.Formatter('%(asctime)s %(levelname)s [%(threadName)s]: %(message)s')
         logger = logging.getLogger(self.path)
         logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
-        lh = logging.FileHandler(self.path + current_time + " =>.." + self.log_file)
+        lh = logging.FileHandler(self.path + current_time + "=> " + self.log_file)
         lh.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         lh.setFormatter(formatter)
@@ -43,6 +54,6 @@ class GetLog():
     # to add the current time and date to log_name
     def time(self):
         current_time = datetime.datetime.now()
-        return current_time.strftime('%Y-%m-%d %H:%M')
+        return current_time.strftime('%Y-%m-%d')
 
-GetLog("/home/kateterekhova/Documents/LiClipse Workspace/Logs/", "new_data_today_test" + ".log", raw_input("text to log: ")).get_log()
+GetLog("/home/kateterekhova/Documents/LiClipse Workspace/Logs/", "new_data_today" + ".log", raw_input("text to log: ")).setup()
