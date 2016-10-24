@@ -22,10 +22,10 @@ def getlog():
         logname = "_".join([TRUN_NAME, date_time]) + ".log"
         log_full_name = path.join(LOGPATH, logname)
         logfile = open(log_full_name, "a")
+        return logfile
     except:
         traceback.print_exc()
         return -1
-    return logfile
         
 def qaprint(logfile, in_msg):
     """ prints message and writs message to the log file
