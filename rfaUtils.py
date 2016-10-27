@@ -31,7 +31,7 @@ def getLog():
                             get_curr_time(),
                             log_format])
         try:
-            logfile = open(filename, "+a")
+            logfile = open(filename, "a")
         except IOError:
             print("\n\nCould not open file: " + filename + "\n\n")
             return -1
