@@ -55,7 +55,7 @@ def get_filename(log_dir):
     file_name = sys.argv[0].split("/")[-1]  # rfaRunner.py
     file_name = os.path.join(path_to_app_folder,
                              log_dir,
-                             file_name + ": " + getCurTime("%Y%m%d_%H-%M") + ".log")
+                             file_name + ": " + getCurTime("%Y%m%d_%H-%M-%S") + ".log")
     return file_name
 
 

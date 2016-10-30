@@ -25,12 +25,10 @@ if local_properties == -1:
 # To use a global log instance in any module use old simple getLog() without any parameters.
 setupLog(local_properties["log_dir"])  # Checks are done in the method itself for better messaging.
 log = getLog()
-
 qaPrint(log, "Logger is created.")
-qaPrint(log, "Running application with config parameters:")
 
-for key, value in local_properties.items():
-    qaPrint(log, key + " : " + value)
+
+qaPrint(log, "Running application with config parameters: " + str(local_properties))
 
 
 # Usage example.
