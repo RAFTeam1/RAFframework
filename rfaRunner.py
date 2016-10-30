@@ -2,26 +2,56 @@
 Created on Oct 19, 2016
 
 @author: sashaalexander
+@author: team X
 '''
-import subRunner
 
-from rfaUtils import getLog, qaprint
+from rfaUtils import getLog, qaPrint, getLocalEnv, validate_and_get_arg, getTestCases, setupLog
 
+import sys
 
-log = getLog()
+properties_file = "local.properties"
 
-message = "It is working, right?"
-qaprint(log, message)
+# Read local properties from file.
+local_properties = getLocalEnv(properties_file)
 
-
-# Tests how would logger behave if called repeatedly
-def testLoggerInsideRunner():
-    qaprint(log, "logging a lot of nums")
-    for i in range(10):
-        qaprint(log, i)
+if local_properties == -1:
+    sys.exit("Exiting: Wasn't able to read local properties, can't proceed.")
 
 
-testLoggerInsideRunner()
+# Setup and get log handler - one log file for the whole application.
+# setupLog() uses log_dir property, stored in rfaRunner module only, to create log folder and global logger instance.
+# To use a global log instance in any module use old simple getLog() without any parameters.
 
-# Tests how logger would be called from another module in different time
-subRunner.testLoggerOutsideRunner()
+setupLog(local_properties["log_dir"])  # Checks are done in the method itself for better messaging.
+log = getLog()  # Can be used anywhere now, will exit with error message if no setup was done.
+
+qaPrint(log, "Logger is created.")
+qaPrint(log, "Running application with config parameters:")
+for key, value in local_properties.items():
+    qaPrint(log, key + " : " + value)
+
+# Usage example
+def usage():
+    qaPrint(log, "Invalid parameters. Proper usage: 'rfaRunner.py --testrun=[0-10000]'")
+
+# Process command line arguments
+qaPrint(log, "Parsing input command line arguments:")
+trid = validate_and_get_arg()
+
+if not isinstance(trid, int):
+    qaPrint(log, trid)
+    usage()
+    sys.exit("Incorrect command line argument(s)")
+
+qaPrint(log, "Running test cases " + str(trid) + ".txt according to command line argument.")
+
+# Get test cases as a dictionary
+test_cases = getTestCases(trid)
+
+if test_cases == -1:
+    sys.exit("Could'n read test cases for id " + str(trid))
+
+# close the log file if it open
+if not log.closed:
+    log.close()
+
