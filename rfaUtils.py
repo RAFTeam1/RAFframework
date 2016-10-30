@@ -9,7 +9,9 @@ from datetime import datetime
 import os
 import sys
 
+
 log_instance = None
+
 
 # Setups log folder and a handler for the log file using log_dir property from config file.
 def setupLog(log_dir):
@@ -17,19 +19,22 @@ def setupLog(log_dir):
         # if logs directory doesn't exist, create it.
         if not os.path.isdir(log_dir):
             os.makedirs(log_dir)
+
         # open log file with prefix and timestamp in Append mode, save it to log instance for all future uses.
         global log_instance
         if log_instance is None:
             filename = get_filename(log_dir)
             log_instance = open(filename, "a")
     except (OSError, IOError):
-        sys.exit("Can't create logger: " + filename)  # Moved the check here for better messaging
+        sys.exit("Can't create logger: " + filename)
+
 
 # Returns pre-setup log instance if present or exiting with error
 def getLog():
     if log_instance is None:
         sys.exit("Error. To use logger, set it up first in rfaRunner using log_dir property from config file.")
     return log_instance
+
 
 # Prints timestamped message to console and saves it to the passed log file.
 def qaPrint(log, message):
@@ -61,8 +66,11 @@ def getLocalEnv(properties_file):
         with open(properties_file) as file:
             data = file.read().split()
             for line in data:
-                key, value = line.split("=")
-                properties_dict[key] = value
+                if len(line) > 0 and "=" in line:
+                    key, value = line.split("=")
+                    properties_dict[key] = value
+                else:
+                    return -1
     except IOError:
         return -1
 
@@ -94,10 +102,10 @@ def validate_and_get_arg():
 # Parses file with test cases and saves test cases to the dictionary.
 def getTestCases(test_run_id):
     parameter_names = ["tcid",
-                            "rest_URL",
-                            "HTTP_method",
-                            "HTTP_RC_desired",
-                            "param_list"]
+                        "rest_URL",
+                        "HTTP_method",
+                        "HTTP_RC_desired",
+                        "param_list"]
     log = getLog()
     qaPrint(log, "Parsing test cases from " + str(test_run_id) + ".txt:")
     result = {}
@@ -122,5 +130,5 @@ def getTestCases(test_run_id):
     except IOError:
         qaPrint(log, "Error while reading test cases - couldn't open file " + str(test_run_id) + ".txt")
         return -1
-    
+
     return result
