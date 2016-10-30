@@ -103,23 +103,24 @@ def getTestCases(test_run_id):
     result = {}
 
     try:
-        tc_file = open("./" + str(test_run_id) + ".txt", "r")
-        data = tc_file.read().split()
+        with open("./" + str(test_run_id) + ".txt", "r") as file:
+            data = file.read().split()
 
-        for line in data:
-            test_case_params = line.split("|")
+            for line in data:
+                test_case_params = line.split("|")
 
-            if len(test_case_params) != 5:
-                qaPrint(log, "List of parameters for a test case is not full")
-                return -1
+                if len(test_case_params) != 5:
+                    qaPrint(log, "List of parameters for a test case is not full")
+                    return -1
 
-            subdict = {parameter_names[1]:test_case_params[1],
-                       parameter_names[2]:test_case_params[2],
-                       parameter_names[3]:test_case_params[3],
-                       parameter_names[4]:test_case_params[4].split(",")}
-            qaPrint(log, "Test case " + test_case_params[0] + " has parameters: " + str(subdict))
-            result[test_case_params[0]] = subdict
+                subdict = {parameter_names[1]:test_case_params[1],
+                           parameter_names[2]:test_case_params[2],
+                           parameter_names[3]:test_case_params[3],
+                           parameter_names[4]:test_case_params[4].split(",")}
+                qaPrint(log, "Test case " + test_case_params[0] + " has parameters: " + str(subdict))
+                result[test_case_params[0]] = subdict
     except IOError:
         qaPrint(log, "Error while reading test cases - couldn't open file " + str(test_run_id) + ".txt")
         return -1
+    
     return result
