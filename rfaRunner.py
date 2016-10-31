@@ -1,19 +1,43 @@
-#!/usr/bin/env python
 '''
 Created on Oct 19, 2016
-Updated on Oct 23, 2016
+
 
 @author: sashaalexander
-@author: tacora
+@author: team X
 '''
-from rfaUtils import getlog, qaprint
+from rfaUtils import *
+import sys
 
-def run_getlog():
-    """ calls getlog() and qaprint()
-    """
-    log = getlog()
-    message = "It is working, right?\n"
-    qaprint(log, message)
+# parsing arguments
+if len(sys.argv) != 2:
+    sys.exit("Invalid number of arguments. rfaRunner accepts one argument")
+arg = sys.argv[1].split("=")
+if arg[0].lower() == "--testrun":
+    if 0 <= int(arg[1]) <= 10000:
+        trid = arg[1]
+    else:
+        sys.exit("Invalid test run number. Valid is in [0-10000]") 
+else:
+    sys.exit("Invalid argument name. Valid argument is '--testrun'") 
 
-if __name__ == "__main__":
-    run_getlog()
+test_cases = getTestCases(trid)
+if test_cases == -1:
+    sys.exit("Unable to read test cases from testrun file")
+
+
+# get the log file handle
+log = getLog(trid)
+
+# exit if log creation failed
+if log == -1:
+    sys.exit("Unable to create log file")
+
+message = "It is working, right?"
+
+# call qaPrint to print a message with timestamp and write it to the log file
+qaPrint(log, message)
+qaPrint(log, "Me like what me see")
+
+# close the log file if it open
+if not log.closed:
+    log.close()
