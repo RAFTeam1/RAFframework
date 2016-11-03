@@ -4,13 +4,13 @@ Created on Oct 19, 2016
 @author: sashaalexander
 @author: team X
 '''
-from datetime import datetime
 import os
 import sys
-import traceback
+from datetime import datetime
+#import traceback
 
 
-def getLog(location,filename):
+def getLog(location, filename):
     """
     Creates 'logs' directory, if it doesn't exist,
     creates or opens a log file in 'logs' directory.
@@ -36,7 +36,7 @@ def qaPrint(log, message):
     """
     Prints 'timestamp + message' to console and writes it to the log file
     """
-    # current date and time as string + message. 
+    # current date and time as string + message
     #example: [Oct 25 01:52:33.000001] TC1 - Passed
     log_message = getCurTime("[%b %d %H:%M:%S.%f]") + " " + message
     # prints log_message
@@ -47,52 +47,58 @@ def qaPrint(log, message):
 
 def getCurTime(date_time_format):
     """
-    Returns current date_time as a string formatted
+    giveittomes current date_time as a string formatted
     """
     date_time = datetime.now().strftime(date_time_format)
     return date_time
 
 
 def getLocalEnv(env_file):
-    #check if file exists
+    """
+    Builds a dictionary of properties from envir file content
+    """
     envfile_dir = os.path.join(os.getcwd())
     envfile_name = os.path.join(envfile_dir, env_file)
     properties = dict()
+    #exit if file does not exist
     if not os.path.isfile(envfile_name):
         sys.exit("%s file doesn't exist" % envfile_name)
     else:
-        with open(envfile_name, "r") as env_file:
-            for line in env_file:
-                try:
+        try:
+            # build the dictionary of properties based on file content
+            with open(envfile_name, "r") as env_file:
+                for line in env_file:
                     line = line.split("=")
                     properties[line[0].strip()] = line[1].strip()
-                except (OSError, IOError):
-                    return -1
-    
-    return properties            
-                
+            return properties
+        except (OSError, IOError):
+            return -1
 
 
 def getTestCases(trid):
-    keys = ["tcid", "rest_URL", "HTTP_method", "HTTP_RC_desired", "param_list"]
+    """
+    Builds a dictionary of parameters for each TC from the file content
+    """
+    keys = ["tcid", "rest_URL", "HTTP_method"
+            , "HTTP_RC_desired", "param_list"]
+    testrun_id = dict()
     testrun_properties = dict()
-    # if file doesn't exist, exit
     testrun_dir = os.path.join(os.getcwd())
     testrun_name = os.path.join(testrun_dir, trid) + ".txt"
+    # if file doesn't exist, exit
     if not os.path.isfile(testrun_name):
         sys.exit("%s file doesn't exist" % testrun_name)
     else:
         try:
+            # build the nested dictionary with parameters for each TC
             with open(testrun_name, "r") as testrun_handle:
                 for line in testrun_handle:
-                    elements = line.split("|")
-                    print elements
-                    #testrun_properties = dict(zip(keys, elements))
-            return testrun_properties
+                    elements = line.strip().split("|")
+                    elements[4] = elements[4].strip().split(",")
+                    elements[3] = int(elements[3])
+                    testrun_properties = dict(zip(keys[1:], elements[1:]))
+                    if int(elements[0]) not in testrun_id:
+                        testrun_id[int(elements[0])] = testrun_properties
+                return testrun_id
         except (OSError, IOError):
-            return -1 
-
-        
-
-
-    
+            return -1
