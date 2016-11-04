@@ -1,61 +1,95 @@
-import logging
-import os
-import os.path
-import time
-from datetime import datetime
+'''
+Created on Oct 19, 2016
 
-def getLog():
-    i = datetime.now()
-    fileName ="Logs/" + "Testrun_" + i.strftime('%Y%m%d_%H:%M') + ".log"
+@author: sashaalexander
+@author: team X
+'''
+from datetime import datetime
+import os
+
+
+#def getLog():
+def getLog(logDir, filename):
+    """
+    Creates 'logs' directory, if it doesn't exist,
+    creates or opens a log file in 'logs' directory.
+    """
+    # assign a current working directory + '/logs' to log_dir variable (platform independent)
+   # log_dir = os.path.join(os.getcwd(), "logs")
+    log_dir = os.path.join(os.getcwd(), logDir)
+
+
+    # or --> script directory: log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+    # or --> user directory: log_dir = os.path.join(os.path.expanduser("~"), "logs")
+
     try:
-         open(fileName, 'a')
-        # return fileName
-    except IOError, e:
-        print 'No such file or directory: %s' % e
+        # if logs directory(!) doesn't exist, create it
+        if not os.path.isdir(log_dir):
+            os.makedirs(log_dir)
+        # open log file with prefix and timestamp (platform independent) in Append mode
+        log = open(os.path.join(log_dir, filename + getCurTime("%Y%m%d_%H-%M") + ".log"), "a")
+        return log
+    except (OSError, IOError):
+        # return -1 in case of exception
         return -1
 
-   # logging.basicConfig(filename=name, level=logging.DEBUG)
-   # logging.basicConfig(format = '%(levelname)-8s [%(asctime)s] %(funcName)s %(message)s', level = logging.DEBUG, filename = name)
-   # logging.debug('This message should go to the log file')
-   # logging.info('So should this')
-   # logging.warning('And this, too')
-    
-    
-     # create a file handler
-   # logger = logging.getLogger()
-    handler = logging.FileHandler(fileName)
-   # handler.setLevel(logging.DEBUG)
-   # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-   # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-   # handler.setFormatter(formatter)
-  #  logger.addHandler(handler)
-   # logging.info("message")
-   #logging.debug('This message should go to the log file')
-   # logging.info('So should this')
-   # logging.warning('And this, too')
-    print handler
 
-    #return fileName
-    return handler
-    
+def qaPrint(log, message):
+    """
+    Prints 'timestamp + message' to console and writes it to the log file
+    """
+    # current date and time as string + message. example: [Oct 25 01:52:33.000001] TC1 - Passed
+    log_message = getCurTime("[%b %d %H:%M:%S.%f]") + " " + message
+    # prints log_message
+    print log_message
+    # writes message to a log file
+    log.write(log_message + "\n")
 
 
-def qaprint(log, message):
+def getCurTime(date_time_format):
+    """
+    Returns current date_time as a string formatted according to date_time_format
+    """
+    date_time = datetime.now().strftime(date_time_format)
+    return date_time
+
+def getLocalEnv(file_name):
+    file_dict = {}
+    try:
+        f =  open(file_name, "r")
+        if os.path.getsize(file_name) > 0:
+            for line in f:
+                pair = line.split("=")
+                file_dict[pair[0].strip()] = pair[1].strip()
+        f.close()  
+        return file_dict
+    except (OSError, IOError, EOFError):
+        # return -1 in case of exception
+        return -1
+
    
-   logger = logging.getLogger()
-   handler = log 
-   logger.setLevel(logging.DEBUG)
-   formatter = logging.Formatter('%(levelname)-8s [%(asctime)s] %(funcName)s: %(message)s')
-   handler.setFormatter(formatter)
-   logger.addHandler(handler)
-   #If fileName is returned as a log:
-  # logging.basicConfig(format = '%(levelname)-8s [%(asctime)s] %(funcName)s: %(message)s', level = logging.DEBUG, filename = log)
-   logging.debug(message)
-   logging.info(message)
-   logging.warning(message)
-   print message
 
+def getTestCases(trid):
+    key_list = ['rest_URL', 'HTTP_method', 'HTTP_RC_desired', 'param_list']
+    mega_dict = {}
+    size = len(key_list)
+    file_name =str(trid) +".txt"
+    try:
+        f =  open(file_name, "r")
+        if os.path.getsize(file_name) > 0:
+            for line in f:
+                dataSet = line.split("|")
+                single_dict = {}
+                for i in range (size):
+                    if key_list[i] == 'param_list':
+                        single_dict [key_list[i]] = dataSet[i +1].strip().split(",")
+                    else:
+                        single_dict [key_list[i]] = dataSet[i +1].strip()
 
-
-
-#print getLog()
+                mega_dict[int(dataSet[0].strip())] = single_dict
+        f.close()  
+        return mega_dict
+    except (OSError, IOError, EOFError):
+        # return -1 in case of exception
+        return -1
+    
