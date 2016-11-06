@@ -93,3 +93,15 @@ def getTestCases(trid):
         # return -1 in case of exception
         return -1
     
+
+def parseCmdArgs(args, argsQuantity):
+    argsDict = {}
+    argsDict ["filename"] =  args[0]
+    for i in range (1, argsQuantity):
+        try:
+            pair = args[i].split("=")
+            argsDict[pair[0].lower().strip()] = pair[1].strip()
+        except (OSError, IOError, EOFError):
+        # return -1 in case of exception
+            return -1
+    return argsDict
