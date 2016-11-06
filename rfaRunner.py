@@ -7,7 +7,7 @@ Created on Oct 19, 2016
 '''
 #Start from command line with   sudo python rfaRunner.py --testrun=42
 
-from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases
+from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases, parseCmdArgs
 
 import sys
 argsQuantity = len(sys.argv)
@@ -16,14 +16,12 @@ argsQuantity = len(sys.argv)
 
 if argsQuantity < 2:
     sys.exit("Incorrect request was entered, example of correct one: rfaRunner.py --testrun=42")
-else:
-    argsDict ={}
-    argsDict ["filename"] =  sys.argv[0]
-    for i in range (1, argsQuantity):
-        pair = sys.argv[i].split("=")
-        argsDict[pair[0].lower().strip()] = pair[1].strip()
 
-    trid = int(argsDict["--testrun"])
+argsDict = parseCmdArgs(sys.argv, argsQuantity)
+if argsDict == -1:
+    sys.exit("Incorrect set of arguments was entered, example of correct one: rfaRunner.py --testrun=42")
+
+trid = int(argsDict["--testrun"])
 
 
 fileToDict = getLocalEnv('local.properties')
