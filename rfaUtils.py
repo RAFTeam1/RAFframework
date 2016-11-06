@@ -17,17 +17,15 @@ def getLog(location, filename):
     """
     # assign a current working dir + '/logs' to log_dir var (OS independent)
     log_dir = os.path.join(os.getcwd(), location)
-    name = filename.split(".")
-    tr_name = name[0]
     try:
         # if logs directory(!) doesn't exist, create it
         if not os.path.isdir(log_dir):
             os.makedirs(log_dir)
         # open log file with prefix and timestamp (OS independ.) in Append mode
-        log = open(os.path.join(log_dir, tr_name + "_" \
+        log = open(os.path.join(log_dir, filename + "_" \
                                 + getCurTime("%Y%m%d_%H-%M") + ".log"), "a")
         return log
-    except (OSError, IOError):
+    except (OSError, IOError, IndexError):
         # return -1 in case of exception
         return -1
 
@@ -47,7 +45,7 @@ def qaPrint(log, message):
 
 def getCurTime(date_time_format):
     """
-    giveittomes current date_time as a string formatted
+    Returns current date_time as a string formatted
     """
     date_time = datetime.now().strftime(date_time_format)
     return date_time
@@ -60,7 +58,7 @@ def getLocalEnv(env_file):
     envfile_dir = os.path.join(os.getcwd())
     envfile_name = os.path.join(envfile_dir, env_file)
     properties = dict()
-    #exit if file does not exist
+    #exit if test run file does not exist
     if not os.path.isfile(envfile_name):
         sys.exit("%s file doesn't exist" % envfile_name)
     else:
@@ -71,7 +69,7 @@ def getLocalEnv(env_file):
                     line = line.split("=")
                     properties[line[0].strip()] = line[1].strip()
             return properties
-        except (OSError, IOError):
+        except (OSError, IOError, IndexError):
             return -1
 
 
@@ -100,5 +98,25 @@ def getTestCases(trid):
                     if int(elements[0]) not in testrun_id:
                         testrun_id[int(elements[0])] = testrun_properties
                 return testrun_id
-        except (OSError, IOError):
+        except (OSError, IOError, IndexError):
             return -1
+
+
+def getArgs(args):
+    """
+    Parses all command line arguments for runner. Returns dictionary of arguments
+    """
+    run_args = dict()
+    try:
+        # get the runner name
+        args[0] = args[0].strip().split('.')
+        args[0] = args[0][0]
+        # add runner name to the dict
+        run_args["runner_name"] = args[0]
+        # build the dict from all given arguments
+        for arg in args[1:]:
+            arg = arg.split("=")
+            run_args[arg[0].lower()] = arg[1].lower()
+        return run_args
+    except (OSError, IOError, IndexError):
+        return -1

@@ -6,20 +6,26 @@ Created on Oct 19, 2016
 @author: team X
 '''
 import sys
-from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases
+from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases, getArgs
 
-# parsing the arguments
-if len(sys.argv) != 2:
-    sys.exit("Invalid number of arguments. rfaRunner accepts one argument")
-tr_name = sys.argv[0]
-arg = sys.argv[1].split("=")
-if arg[0].lower() == "--testrun":
-    if int(arg[1]) in range(0, 10001):
-        trid = arg[1]
+# get the arguments
+arg = getArgs(sys.argv)
+if arg == -1:
+    sys.exit("Unable to parse arguments")
+# exit if number of arguments != 1
+if len(arg) != 2:
+        sys.exit("Invalid number of arguments. rfaRunner accepts one argument")
+tr_name = arg['runner_name']
+# exit if argument is incorrect
+if '--testrun' in arg:
+    # exit if testrun number is out of given range
+    if int(arg['--testrun']) in range(0, 10001):
+        trid = arg['--testrun']
     else:
         sys.exit("Invalid test run number. Valid is in [0-10000]")
 else:
     sys.exit("Invalid argument name. Valid argument is '--testrun'")
+
 
 # get TCs properties for specified test run
 test_cases = getTestCases(trid)
