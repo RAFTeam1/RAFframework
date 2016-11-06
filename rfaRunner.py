@@ -5,18 +5,25 @@ Created on Oct 19, 2016
 @author: sashaalexander
 @author: team X
 '''
+#Start from command line with   sudo python rfaRunner.py --testrun=42
+
 from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases
 
 import sys
-
+argsQuantity = len(sys.argv)
 
 # ---------------------------------
-filename =  sys.argv[0]
-if len(sys.argv) < 2:
+
+if argsQuantity < 2:
     sys.exit("Incorrect request was entered, example of correct one: rfaRunner.py --testrun=42")
 else:
-    testId = sys.argv[1].split("=")
-    trid =  int(testId[1])
+    argsDict ={}
+    argsDict ["filename"] =  sys.argv[0]
+    for i in range (1, argsQuantity):
+        pair = sys.argv[i].split("=")
+        argsDict[pair[0].lower().strip()] = pair[1].strip()
+
+    trid = int(argsDict["--testrun"])
 
 
 fileToDict = getLocalEnv('local.properties')
@@ -24,7 +31,7 @@ if fileToDict  == -1:
     sys.exit("Can't create a dictionary: the file local.properties is empty or doesn't exist")
 else:
     # get the log file handle
-    log = getLog(fileToDict['log_dir'], filename)
+    log = getLog(fileToDict['log_dir'], argsDict ["filename"] )
 
 #===============================
 # exit if log creation failed
@@ -42,7 +49,6 @@ qaPrint(log, message)
 myDict = getTestCases(trid)
 if myDict  == -1:
     qaPrint(log, "Can't create a dictionary: the file is empty or doesn't exist")
-
     
 # close the log file if it open
 if not log.closed:
