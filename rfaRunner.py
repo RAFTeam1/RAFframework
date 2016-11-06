@@ -32,7 +32,7 @@ test_cases = getTestCases(trid)
 # exit if getting TCs' properties failed
 if test_cases == -1:
     sys.exit("Unable to read test cases from %s file" % trid)
-
+print test_cases
 # get local environment properties
 env = getLocalEnv("local.properties")
 # exit if reading envir properties failed

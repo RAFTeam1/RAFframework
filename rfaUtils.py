@@ -76,9 +76,11 @@ def getLocalEnv(env_file):
 def getTestCases(trid):
     """
     Builds a dictionary of parameters for each TC from the file content
+    like: 01|/auth/login|post|200|username,password
     """
     keys = ["tcid", "rest_URL", "HTTP_method"
             , "HTTP_RC_desired", "param_list"]
+    int_values = ["HTTP_RC_desired"]
     testrun_id = dict()
     testrun_properties = dict()
     testrun_dir = os.path.join(os.getcwd())
@@ -93,8 +95,11 @@ def getTestCases(trid):
                 for line in testrun_handle:
                     elements = line.strip().split("|")
                     elements[4] = elements[4].strip().split(",")
-                    elements[3] = int(elements[3])
                     testrun_properties = dict(zip(keys[1:], elements[1:]))
+                    # convert required TC parameters to integers
+                    for key, val in testrun_properties.items():
+                        if key in int_values:
+                            testrun_properties[key] = int(val)
                     if int(elements[0]) not in testrun_id:
                         testrun_id[int(elements[0])] = testrun_properties
                 return testrun_id
