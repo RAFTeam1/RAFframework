@@ -80,7 +80,6 @@ def getTestCases(trid):
             "HTTP_RC_desired", "param_list"]
     int_values = ["HTTP_RC_desired"]
     test_cases_dict = dict()
-    testrun_properties = dict()
     testrun_dir = os.path.join(os.getcwd())
     testrun_name = os.path.join(testrun_dir, trid) + ".txt"
 
@@ -94,13 +93,14 @@ def getTestCases(trid):
                 for line in testrun_handle:
                     elements = line.strip().split("|")
                     elements[4] = elements[4].strip().split(",")
-                    testrun_properties = dict(zip(keys[1:], elements[1:]))
+                    test_case = dict(zip(keys[1:], elements[1:]))
+
                     # convert required TC parameters to integers
-                    for key, val in testrun_properties.items():
+                    for key, val in test_case.items():
                         if key in int_values:
-                            testrun_properties[key] = int(val)
+                            test_case[key] = int(val)
                     if int(elements[0]) not in test_cases_dict:
-                        test_cases_dict[int(elements[0])] = testrun_properties
+                        test_cases_dict[int(elements[0])] = test_case
                 return test_cases_dict
         except (OSError, IOError, IndexError):
             return -1
