@@ -1,62 +1,62 @@
 '''
-Created on Oct 19, 2016
-
+Created on Nov 7, 2016
 @author: sashaalexander
 @author: team 1
 '''
 
-from rfaUtils import getLog, qaPrint, getLocalEnv, validate_and_get_arg, getTestCases, setupLog
-
 import sys
+from rfaUtils import getLog, qaPrint, getLocalEnv, getTestCases, getArgs, validate_testrun
 
 
-properties_file = "local.properties"
+local_properties = "local.properties"
+
+# get and save command line arguments to the args dictionary
+args = getArgs(sys.argv)
+if args == -1:
+    sys.exit("Unable to parse arguments")
+
+# get local environment properties
+env = getLocalEnv(local_properties)
+if env == -1:
+    sys.exit("Unable to read the %s file" % "local.properties")
+
+# get the log file handle
+application_name = args['runner_name']
+log_location = env['log_dir']
+
+log = getLog(log_location, application_name)
+if log == -1:
+    sys.exit("Unable to create log file")
+
+# start logging
+qaPrint(log, "Logger is created. Running application with config parameters: \n " + str(env))
 
 
-# Read local properties from file.
-local_properties = getLocalEnv(properties_file)
-
-if local_properties == -1:
-    sys.exit("Exiting: Wasn't able to read local properties, can't proceed.")
-
-
-# Setup and get log handler - one log file for the whole application.
-# setupLog() uses log_dir property, stored in rfaRunner module only, to create log folder and global logger instance.
-# To use a global log instance in any module use old simple getLog() without any parameters.
-setupLog(local_properties["log_dir"])  # Checks are done in the method itself for better messaging.
-log = getLog()
-qaPrint(log, "Logger is created.")
-
-
-qaPrint(log, "Running application with config parameters: " + str(local_properties))
-
-
-# Usage example.
+# get and validate test run id from the command line parameter in args dictionary
 def usage():
     qaPrint(log, "Invalid parameters. Proper usage: 'rfaRunner.py --testrun=[0-10000]'")
 
-
-# Process command line arguments.
-qaPrint(log, "Parsing input command line arguments:")
-trid = validate_and_get_arg()
-
-if not isinstance(trid, int):
-    qaPrint(log, trid)
+trid = validate_testrun(args)
+if trid == -1:
     usage()
-    sys.exit("Incorrect command line argument(s)")
-
-# Start processing test cases.
-qaPrint(log, "Running test cases " + str(trid) + ".txt according to command line argument.")
+    sys.exit("Incorrect or missing testrun argument")
 
 
-# Get test cases as a dictionary.
+# get TCs properties for specified test run
+qaPrint(log, "Reading test cases from " + str(trid) + ".txt according to testrun argument.")
+
 test_cases = getTestCases(trid)
-
 if test_cases == -1:
-    sys.exit("Could'n read test cases for id " + str(trid))
+    qaPrint(log, "Unable to read test cases from %s file" % trid)
+    sys.exit("Unable to read test cases from %s file" % trid)
+
+qaPrint(log, "Test cases: \n %s" % test_cases)
 
 
-# Close the log file if it open.
+#old message to test the logger - can be deleted now
+message = "It is working, right?"
+qaPrint(log, message)
+
+# close the log file if it open
 if not log.closed:
     log.close()
-
