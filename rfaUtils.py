@@ -3,11 +3,67 @@ Created on Oct 19, 2016
 
 @author: sashaalexander
 @author: team X
+@author: tacora
 '''
 import os
 import sys
 from datetime import datetime
 #import traceback
+
+
+def getArgs(args):
+    """
+    Parses all command line arguments for runner. Returns dictionary of arguments
+    """
+    run_args = dict()
+    try:
+        # get the runner name
+        args[0] = args[0].strip().split('.')
+        args[0] = args[0][0]
+        # add runner name to the dict
+        run_args["runner_name"] = args[0]
+        # build the dict from all given arguments
+        for arg in args[1:]:
+            arg = arg.split("=")
+            run_args[arg[0].lower()] = arg[1].lower()
+        return run_args
+    except (OSError, IOError, IndexError):
+        return -1
+
+
+def validateArgs(args_dict):
+    # exit if number of arguments != 1
+    if len(args_dict) != 2:
+        sys.exit("Invalid number of arguments. %s accepts one argument" % args_dict["runner_name"])
+    # exit if argument is incorrect
+    if '--testrun' in args_dict:
+        # exit if testrun number is out of given range
+        if int(args_dict['--testrun']) not in range(0, 10001):
+            sys.exit("Invalid test run number. Valid is in [0-10000]")
+    else:
+        sys.exit("Invalid argument name. Valid argument is '--testrun'")
+
+
+def getLocalEnv(env_file):
+    """
+    Builds a dictionary of properties from envir file content
+    """
+    envfile_dir = os.path.join(os.getcwd())
+    envfile_name = os.path.join(envfile_dir, env_file)
+    properties = dict()
+    #exit if test run file does not exist
+    if not os.path.isfile(envfile_name):
+        sys.exit("%s file doesn't exist" % envfile_name)
+    else:
+        try:
+            # build the dictionary of properties based on file content
+            with open(envfile_name, "r") as env_file:
+                for line in env_file:
+                    line = line.split("=")
+                    properties[line[0].strip()] = line[1].strip()
+            return properties
+        except (OSError, IOError, IndexError):
+            return -1
 
 
 def getLog(location, filename):
@@ -51,28 +107,6 @@ def getCurTime(date_time_format):
     return date_time
 
 
-def getLocalEnv(env_file):
-    """
-    Builds a dictionary of properties from envir file content
-    """
-    envfile_dir = os.path.join(os.getcwd())
-    envfile_name = os.path.join(envfile_dir, env_file)
-    properties = dict()
-    #exit if test run file does not exist
-    if not os.path.isfile(envfile_name):
-        sys.exit("%s file doesn't exist" % envfile_name)
-    else:
-        try:
-            # build the dictionary of properties based on file content
-            with open(envfile_name, "r") as env_file:
-                for line in env_file:
-                    line = line.split("=")
-                    properties[line[0].strip()] = line[1].strip()
-            return properties
-        except (OSError, IOError, IndexError):
-            return -1
-
-
 def getTestCases(trid):
     """
     Builds a dictionary of parameters for each TC from the file content
@@ -81,47 +115,29 @@ def getTestCases(trid):
     keys = ["tcid", "rest_URL", "HTTP_method"
             , "HTTP_RC_desired", "param_list"]
     int_values = ["HTTP_RC_desired"]
-    testrun_id = dict()
-    testrun_properties = dict()
+    list_values = ["param_list"]
+    testcases = dict()
+    testcase_properties = dict()
     testrun_dir = os.path.join(os.getcwd())
     testrun_name = os.path.join(testrun_dir, trid) + ".txt"
-    # if file doesn't exist, exit
     if not os.path.isfile(testrun_name):
-        sys.exit("%s file doesn't exist" % testrun_name)
-    else:
-        try:
-            # build the nested dictionary with parameters for each TC
-            with open(testrun_name, "r") as testrun_handle:
-                for line in testrun_handle:
-                    elements = line.strip().split("|")
-                    elements[4] = elements[4].strip().split(",")
-                    testrun_properties = dict(zip(keys[1:], elements[1:]))
-                    # convert required TC parameters to integers
-                    for key, val in testrun_properties.items():
-                        if key in int_values:
-                            testrun_properties[key] = int(val)
-                    if int(elements[0]) not in testrun_id:
-                        testrun_id[int(elements[0])] = testrun_properties
-                return testrun_id
-        except (OSError, IOError, IndexError):
-            return -1
-
-
-def getArgs(args):
-    """
-    Parses all command line arguments for runner. Returns dictionary of arguments
-    """
-    run_args = dict()
+        return -2
     try:
-        # get the runner name
-        args[0] = args[0].strip().split('.')
-        args[0] = args[0][0]
-        # add runner name to the dict
-        run_args["runner_name"] = args[0]
-        # build the dict from all given arguments
-        for arg in args[1:]:
-            arg = arg.split("=")
-            run_args[arg[0].lower()] = arg[1].lower()
-        return run_args
+        # build the nested dictionary with parameters for each TC
+        with open(testrun_name, "r") as testrun_handle:
+            for line in testrun_handle:
+                elements = line.strip().split("|")
+                testcase_properties = dict(zip(keys[1:], elements[1:]))
+                # convert required TC parameters to integers or lists
+                for key, val in testcase_properties.items():
+                    if key in int_values:
+                        testcase_properties[key] = int(val)
+                    if key in list_values:
+                        val = val.strip().split(",")
+                        testcase_properties[key] = val
+                # build the nested dictionary: properties for each test case
+                if int(elements[0]) not in testcases:
+                    testcases[int(elements[0])] = testcase_properties
+            return testcases
     except (OSError, IOError, IndexError):
         return -1
