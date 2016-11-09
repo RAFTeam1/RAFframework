@@ -17,11 +17,8 @@ def getArgs(args):
     """
     run_args = dict()
     try:
-        # get the runner name
-        args[0] = args[0].strip().split('.')
-        args[0] = args[0][0]
-        # add runner name to the dict
-        run_args["runner_name"] = args[0]
+        # get the runner name and add runner name to the dict
+        run_args["runner_name"] = args[0].split('.')[0].strip()
         # build the dict from all given arguments
         for arg in args[1:]:
             arg = arg.split("=")
